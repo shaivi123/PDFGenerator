@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="users")
+@Table(name="employees")
 public class Employee {
     @Id
     private long id;
