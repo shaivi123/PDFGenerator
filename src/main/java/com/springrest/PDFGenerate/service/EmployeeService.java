@@ -1,26 +1,63 @@
 package com.springrest.PDFGenerate.service;
 
-import com.springrest.PDFGenerate.model.Employee;
+import com.aspose.cells.HtmlSaveOptions;
+import com.aspose.cells.SaveFormat;
+import com.aspose.cells.Workbook;
+import com.itextpdf.text.Document;
+import com.springrest.PDFGenerate.model.Book;
 import com.springrest.PDFGenerate.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-//import org.thymeleaf.context.Context;
-//import org.thymeleaf.spring5.SpringTemplateEngine;
-//import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Service
 public class EmployeeService {
 
     @Autowired(required = false)
-    private EmployeeRepository employeeRepository;
+    private static EmployeeRepository employeeRepository;
+    static List<Book> list;
+
+       public EmployeeService() {
+           list = new ArrayList<>();
+       }
+
+        public static Book addBook(Book book) {
+        list.add(book);
+        return book;
+    }
+
+    public Book getJson(Book book) throws Exception {
+        // this code is converting json to html
+        Workbook workbook=new Workbook();
+        System.out.println("workbook call");
+        HtmlSaveOptions saveOptions = new HtmlSaveOptions(SaveFormat.HTML);
+        saveOptions.setExportGridLines(true);
+       // saveOptions.setExportHeadings(true);
+        saveOptions.setSaveAsSingleFile(true);
+        System.out.println("workbook call 1111111111111");
+        saveOptions.setPageTitle("Convert JSON to HTML");
+        System.out.println("workbook call !!!!!!!!!!!!!!!!!!!!!!!!");
+        workbook.save(book + "books-template.html", saveOptions);
+        System.out.println("workbook call  $$$$$$$$$$$$$$$$$$$$$$"+workbook);
+        return book;
+    }
+
+//    Workbook workbook = new Workbook("C:\\SampleJson.json");
+    public Book createDataForPdf(String title, int price, String language, String author, String content) {
+        Document document = new Document();
+        document.open();
+        Book books = new Book();
+        books.setTitle(title);
+        books.setPrice(price);
+        books.setLanguage(language);
+        books.setAuthor(author);
+        document.close();
+
+        return books;
+    }
+
 //
 //    public void GeneratePDF() {
 //        employeeRepository.findAll();
