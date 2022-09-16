@@ -11,6 +11,7 @@ import org.thymeleaf.TemplateEngine;
 //import com.aspose.cells.Workbook;
 import javax.servlet.ServletContext;
 import java.io.*;
+import java.util.List;
 
 @RestController
 public class MyController {
@@ -47,22 +48,67 @@ public class MyController {
             throw new RuntimeException(ep);
         }
     }
-        @PostMapping("/addBook")
-        public Book addBook(@RequestBody Book book) {
-            Document document=new Document();
-            try{
-                document.open();
-              //  employeeService.addBook(book);
-                System.out.println("method call");
-               return  employeeService.getJson(book);
-               //  System.out.println("json call");
-             //  HtmlConverter.convertToPdf(String.valueOf(book), new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
-             //   document.close();
-           // return EmployeeService.addBook(book);
-            }catch (Exception ep) {
-                throw new RuntimeException(ep);
+
+    @PostMapping("/downloadingDataWithPDFOnFolder")
+    public void downloadDataWithPDF(@RequestBody List<Book> books){
+        Document document=new Document();
+        try{
+            StringBuilder dataPdf=new StringBuilder();
+            for(Book book:books){
+                dataPdf.append("<tr><td>").append(book.getTitle()).append("</td>").append("<td>").append(book.getPrice()).append("</td>").append("<td>").append(book.getLanguage()).append("</td>").append("<td>").append(book.getAuthor()).append("</td></tr>");
             }
-      }
+            String k="<!DOCTYPE html>\n" +
+                    "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:th=\"http://www.thymeleaf.org\"\n" +
+                    "xmlns:float=\"http://www.w3.org/1999/xhtml\">\n" +
+                    "<head>\n" +
+                    "<meta charset=\"UTF-8\">\n" +
+                    "<title>Title</title>\n" +
+                    "<link rel=\"stylesheet\"\n" +
+                    "href=\"https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css\">\n" +
+                    "</head>\n" +
+                    "<body>\n" +
+                    "<div class=\"container-fluid\">\n" +
+                    "<div class=\"row\">\n" +
+                    "<div class=\"col-md-12\">\n" +
+                    "<h2 style=\"float:center;\"> All Books </h2>\n" +
+                    "<div style=\"margin-top:20px\">\n" +
+                    "<table id=\"books\" class=\"table table-striped table-bordered\" style=\"width:100%\">\n" +
+                    "<thead>\n" +
+                    "<tr>\n" +
+                    "<th>Title</th>\n" +
+                    "<th>Price</th>\n" +
+                    "<th>Language</th>\n" +
+                    "<th>Author</th>\n" +
+                    "</tr>\n"
+                    +dataPdf+
+                    "</thead>\n" +
+                    "</table>\n" +
+                    "</div>\n" +
+                    "</div>\n" +
+                    "</div>\n" +
+                    "</div>\n" +
+                    "</body>\n" +
+                    "</html>";
+            document.open();
+            HtmlConverter.convertToPdf(k, new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+            document.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @GetMapping("/dataSending")
+    public void dataSending(){
+        Document document=new Document();
+        try {
+            document.open();
+            HtmlConverter.convertToPdf(new FileInputStream("src/main/resources/templates/about.html"),
+                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+        }catch(Exception e){
+            System.out.println(e);
+        }
+    }
 
 
 
@@ -73,7 +119,58 @@ public class MyController {
 
 
 
-      //Workbook workbook = new Workbook(dataDir + "output.xls");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //        @PostMapping("/addBook")
+//        public Book addBook(@RequestBody Book book) {
+//            Document document=new Document();
+//            try{
+//                document.open();
+//              //  employeeService.addBook(book);
+//                System.out.println("method call");
+//               return  employeeService.getJson(book);
+//               //  System.out.println("json call");
+//             //  HtmlConverter.convertToPdf(String.valueOf(book), new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+//             //   document.close();
+//           // return EmployeeService.addBook(book);
+//            }catch (Exception ep) {
+//                throw new RuntimeException(ep);
+//            }
+//      }
+// Workbook workbook = new Workbook(dataDir + "output.xls");
 
 //     this method is used to send data from postman in json format but it's not worked
 //    @RequestMapping(path = "/pdf")

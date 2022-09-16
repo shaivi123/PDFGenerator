@@ -1,8 +1,6 @@
 package com.springrest.PDFGenerate.service;
 
-import com.aspose.cells.HtmlSaveOptions;
-import com.aspose.cells.SaveFormat;
-import com.aspose.cells.Workbook;
+
 import com.itextpdf.text.Document;
 import com.springrest.PDFGenerate.model.Book;
 import com.springrest.PDFGenerate.repository.EmployeeRepository;
@@ -28,21 +26,21 @@ public class EmployeeService {
         return book;
     }
 
-    public Book getJson(Book book) throws Exception {
-        // this code is converting json to html
-        Workbook workbook=new Workbook();
-        System.out.println("workbook call");
-        HtmlSaveOptions saveOptions = new HtmlSaveOptions(SaveFormat.HTML);
-        saveOptions.setExportGridLines(true);
-       // saveOptions.setExportHeadings(true);
-        saveOptions.setSaveAsSingleFile(true);
-        System.out.println("workbook call 1111111111111");
-        saveOptions.setPageTitle("Convert JSON to HTML");
-        System.out.println("workbook call !!!!!!!!!!!!!!!!!!!!!!!!");
-        workbook.save(book + "books-template.html", saveOptions);
-        System.out.println("workbook call  $$$$$$$$$$$$$$$$$$$$$$"+workbook);
-        return book;
-    }
+//    public Book getJson(Book book) throws Exception {
+//        // this code is converting json to html
+//        Workbook workbook=new Workbook();
+//        System.out.println("workbook call");
+//        HtmlSaveOptions saveOptions = new HtmlSaveOptions(SaveFormat.HTML);
+//        saveOptions.setExportGridLines(true);
+//       // saveOptions.setExportHeadings(true);
+//        saveOptions.setSaveAsSingleFile(true);
+//        System.out.println("workbook call 1111111111111");
+//        saveOptions.setPageTitle("Convert JSON to HTML");
+//        System.out.println("workbook call !!!!!!!!!!!!!!!!!!!!!!!!");
+//        workbook.save(book + "books-template.html", saveOptions);
+//        System.out.println("workbook call  $$$$$$$$$$$$$$$$$$$$$$"+workbook);
+//        return book;
+//    }
 
 //    Workbook workbook = new Workbook("C:\\SampleJson.json");
     public Book createDataForPdf(String title, int price, String language, String author, String content) {
