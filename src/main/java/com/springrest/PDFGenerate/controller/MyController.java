@@ -2,6 +2,8 @@ package com.springrest.PDFGenerate.controller;
 
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
 import com.springrest.PDFGenerate.dto.PdfRequest;
 import com.springrest.PDFGenerate.model.Book;
 import com.springrest.PDFGenerate.service.EmployeeService;
@@ -12,6 +14,7 @@ import org.thymeleaf.TemplateEngine;
 import javax.servlet.ServletContext;
 import java.io.*;
 import java.util.List;
+import java.util.Scanner;
 
 @RestController
 public class MyController {
@@ -25,10 +28,13 @@ public class MyController {
 
     //File upload
     @PostMapping("/downloadingPDFOnLocal")
-    public String addPDF(@RequestBody String content,PdfRequest dto){
+    public String addPDF(@RequestBody String content){
         Document document=new Document();
         try{
             document.open();
+            File file = new File("src/main/resources/templates/myfile.html");
+            OutputStream out = new FileOutputStream(file);
+
             HtmlConverter.convertToPdf(content, new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
            // document.save();
             document.close();
@@ -102,9 +108,32 @@ public class MyController {
     public void dataSending(){
         Document document=new Document();
         try {
+            File file = new File("src/main/resources/templates/about.html");
+            Scanner sc = new Scanner(file);
+            StringBuffer k=new StringBuffer();
+            while (sc.hasNextLine())
+                k.append(sc.nextLine());
             document.open();
-            HtmlConverter.convertToPdf(new FileInputStream("src/main/resources/templates/about.html"),
+            HtmlConverter.convertToPdf(String.valueOf(k),
                     new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+            document.close();
+        }catch(Exception e){
+            System.out.println(e);
+        }
+    }
+    @PostMapping("/holdData")
+    public void holdData(@RequestBody String html){
+        Document document=new Document();
+        try{
+            document.open();
+            PdfWriter writer = PdfWriter.getInstance(document,
+                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+            document.open();
+            XMLWorkerHelper.getInstance().parseXHtml(writer, document,
+                    new FileInputStream("src/main/resources/templates/about.html"));
+            document.close();
+        //  HtmlConverter.convertToPdf(html,new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+            document.close();
         }catch(Exception e){
             System.out.println(e);
         }
@@ -122,8 +151,17 @@ public class MyController {
 
 
 
-
-
+    //    @GetMapping("/dataSending")
+//    public void dataSending(){
+//        Document document=new Document();
+//        try {
+//            document.open();
+//            HtmlConverter.convertToPdf(new FileInputStream("src/main/resources/templates/about.html"),
+//                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+//        }catch(Exception e){
+//            System.out.println(e);
+//        }
+//    }
 
 
 
