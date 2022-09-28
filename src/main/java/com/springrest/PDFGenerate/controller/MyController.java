@@ -2,16 +2,8 @@ package com.springrest.PDFGenerate.controller;
 
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
-import com.springrest.PDFGenerate.dto.PdfRequest;
 import com.springrest.PDFGenerate.model.Book;
-import com.springrest.PDFGenerate.service.EmployeeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.TemplateEngine;
-//import com.aspose.cells.Workbook;
-import javax.servlet.ServletContext;
 import java.io.*;
 import java.util.List;
 import java.util.Scanner;
@@ -19,125 +11,193 @@ import java.util.Scanner;
 @RestController
 public class MyController {
 
-    @Autowired(required = false)
-    private EmployeeService employeeService;
-    @Autowired
-    ServletContext servletContext;
-    @Autowired
-    private  TemplateEngine templateEngine;
 
-    //File upload
-    @PostMapping("/downloadingPDFOnLocal")
-    public String addPDF(@RequestBody String content){
-        Document document=new Document();
-        try{
-            document.open();
-            File file = new File("src/main/resources/templates/myfile.html");
-            OutputStream out = new FileOutputStream(file);
 
-            HtmlConverter.convertToPdf(content, new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
-           // document.save();
-            document.close();
-            return "books-template";
-        }catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    @PostMapping("/downloadingPDFOnFolder")
-    public void downloadPDF(@RequestBody String content){
+    //here start the main code
+    @PostMapping("/dataSending")
+    public String dataSending(@RequestBody List<Book> books){
         Document document=new Document();
-        try{
-            document.open();
-            HtmlConverter.convertToPdf(content, new FileOutputStream("/home/shaivi/Downloads/Test.pdf/"));
-            document.close();
-        }catch (Exception ep) {
-            throw new RuntimeException(ep);
-        }
-    }
-
-    @PostMapping("/downloadingDataWithPDFOnFolder")
-    public void downloadDataWithPDF(@RequestBody List<Book> books){
-        Document document=new Document();
-        try{
+        try {
+            File file = new File("src/main/resources/templates/file.html");
+            Scanner sc = new Scanner(file);
+            StringBuilder k=new StringBuilder();
+            while (sc.hasNextLine())
+                k.append(sc.nextLine());
             StringBuilder dataPdf=new StringBuilder();
             for(Book book:books){
                 dataPdf.append("<tr><td>").append(book.getTitle()).append("</td>").append("<td>").append(book.getPrice()).append("</td>").append("<td>").append(book.getLanguage()).append("</td>").append("<td>").append(book.getAuthor()).append("</td></tr>");
             }
-            String k="<!DOCTYPE html>\n" +
-                    "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:th=\"http://www.thymeleaf.org\"\n" +
-                    "xmlns:float=\"http://www.w3.org/1999/xhtml\">\n" +
-                    "<head>\n" +
-                    "<meta charset=\"UTF-8\">\n" +
-                    "<title>Title</title>\n" +
-                    "<link rel=\"stylesheet\"\n" +
-                    "href=\"https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css\">\n" +
-                    "</head>\n" +
-                    "<body>\n" +
-                    "<div class=\"container-fluid\">\n" +
-                    "<div class=\"row\">\n" +
-                    "<div class=\"col-md-12\">\n" +
-                    "<h2 style=\"float:center;\"> All Books </h2>\n" +
-                    "<div style=\"margin-top:20px\">\n" +
-                    "<table id=\"books\" class=\"table table-striped table-bordered\" style=\"width:100%\">\n" +
-                    "<thead>\n" +
-                    "<tr>\n" +
-                    "<th>Title</th>\n" +
-                    "<th>Price</th>\n" +
-                    "<th>Language</th>\n" +
-                    "<th>Author</th>\n" +
-                    "</tr>\n"
-                    +dataPdf+
-                    "</thead>\n" +
-                    "</table>\n" +
-                    "</div>\n" +
-                    "</div>\n" +
-                    "</div>\n" +
-                    "</div>\n" +
-                    "</body>\n" +
-                    "</html>";
+            String output= k.toString().replace("$$body$$",dataPdf.toString());
             document.open();
-            HtmlConverter.convertToPdf(k, new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
-            document.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            HtmlConverter.convertToPdf(output,
+                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+        }catch(Exception e){
+            System.out.println(e);
         }
+        return "Data-saved";
     }
-    @GetMapping("/dataSending")
-    public void dataSending(){
-        Document document=new Document();
+    @PostMapping("/saveTemplate")
+    public String saveTemplate(@RequestBody String content){
+        File path = new File("src/main/resources/templates/file.html");
+        FileWriter wr = null;
         try {
-            File file = new File("src/main/resources/templates/about.html");
-            Scanner sc = new Scanner(file);
-            StringBuffer k=new StringBuffer();
-            while (sc.hasNextLine())
-                k.append(sc.nextLine());
-            document.open();
-            HtmlConverter.convertToPdf(String.valueOf(k),
-                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
-            document.close();
-        }catch(Exception e){
-            System.out.println(e);
-        }
+            wr = new FileWriter(path);
+            wr.write(content);
+            wr.flush();
+            wr.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }return "Template-saved";
     }
-    @PostMapping("/holdData")
-    public void holdData(@RequestBody String html){
-        Document document=new Document();
-        try{
-            document.open();
-            PdfWriter writer = PdfWriter.getInstance(document,
-                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
-            document.open();
-            XMLWorkerHelper.getInstance().parseXHtml(writer, document,
-                    new FileInputStream("src/main/resources/templates/about.html"));
-            document.close();
-        //  HtmlConverter.convertToPdf(html,new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
-            document.close();
-        }catch(Exception e){
-            System.out.println(e);
-        }
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    //File upload
+//    @PostMapping("/downloadingPDFOnLocal")
+//    public String addPDF(@RequestBody String content){
+//        Document document=new Document();
+//        try{
+//            document.open();
+//            File file = new File("src/main/resources/templates/myfile.html");
+//            OutputStream out = new FileOutputStream(file);
+//
+//            HtmlConverter.convertToPdf(content, new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+//           // document.save();
+//            document.close();
+//            return "books-template";
+//        }catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+//    @PostMapping("/downloadingPDFOnFolder")
+//    public void downloadPDF(@RequestBody String content){
+//        Document document=new Document();
+//        try{
+//            document.open();
+//            HtmlConverter.convertToPdf(content, new FileOutputStream("/home/shaivi/Downloads/Test.pdf/"));
+//            document.close();
+//        }catch (Exception ep) {
+//            throw new RuntimeException(ep);
+//        }
+//    }
+//
+//    @PostMapping("/downloadingDataWithPDFOnFolder")
+//    public void downloadDataWithPDF(@RequestBody List<Book> books){
+//        Document document=new Document();
+//        try{
+//            StringBuilder dataPdf=new StringBuilder();
+//            for(Book book:books){
+//                dataPdf.append("<tr><td>").append(book.getTitle()).append("</td>").append("<td>").append(book.getPrice()).append("</td>").append("<td>").append(book.getLanguage()).append("</td>").append("<td>").append(book.getAuthor()).append("</td></tr>");
+//            }
+//            String k="<!DOCTYPE html>\n" +
+//                    "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:th=\"http://www.thymeleaf.org\"\n" +
+//                    "xmlns:float=\"http://www.w3.org/1999/xhtml\">\n" +
+//                    "<head>\n" +
+//                    "<meta charset=\"UTF-8\">\n" +
+//                    "<title>Title</title>\n" +
+//                    "<link rel=\"stylesheet\"\n" +
+//                    "href=\"https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css\">\n" +
+//                    "</head>\n" +
+//                    "<body>\n" +
+//                    "<div class=\"container-fluid\">\n" +
+//                    "<div class=\"row\">\n" +
+//                    "<div class=\"col-md-12\">\n" +
+//                    "<h2 style=\"float:center;\"> All Books </h2>\n" +
+//                    "<div style=\"margin-top:20px\">\n" +
+//                    "<table id=\"books\" class=\"table table-striped table-bordered\" style=\"width:100%\">\n" +
+//                    "<thead>\n" +
+//                    "<tr>\n" +
+//                    "<th>Title</th>\n" +
+//                    "<th>Price</th>\n" +
+//                    "<th>Language</th>\n" +
+//                    "<th>Author</th>\n" +
+//                    "</tr>\n"
+//                    +dataPdf+
+//                    "</thead>\n" +
+//                    "</table>\n" +
+//                    "</div>\n" +
+//                    "</div>\n" +
+//                    "</div>\n" +
+//                    "</div>\n" +
+//                    "</body>\n" +
+//                    "</html>";
+//            document.open();
+//            HtmlConverter.convertToPdf(k, new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+//            document.close();
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+//
+//    @PostMapping("/holdData")
+//    public void holdData(@RequestBody String html) {
+//        Document document = new Document();
+//        try {
+//            document.open();
+//            PdfWriter writer = PdfWriter.getInstance(document,
+//                    new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+//            document.open();
+//            XMLWorkerHelper.getInstance().parseXHtml(writer, document,
+//                    new FileInputStream("src/main/resources/templates/about.html"));
+//            document.close();
+//            //  HtmlConverter.convertToPdf(html,new FileOutputStream("src/main/resources/PDF/books-template.pdf"));
+//            document.close();
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
+//    }
+//    @PostMapping("/convert")
+//    public void renderAndSendAndConvertToPdf(@RequestBody TemplateToHtml dto, String filename) {
+//        String render= renderer.renderHtml(dto.getTemplateName(), dto.getData());
+//
+//        try {
+//            File file = new File("src/main/resources/templates/file.html");
+//            Scanner sc = new Scanner(file);
+//            StringBuilder k=new StringBuilder();
+//            while (sc.hasNextLine())
+//                k.append(sc.nextLine());
+////            StringBuilder dataPdf=new StringBuilder();
+////            for(Book book:books){
+////                dataPdf.append("<tr><td>").append(book.getTitle()).append("</td>").append("<td>").append(book.getPrice()).append("</td>").append("<td>").append(book.getLanguage()).append("</td>").append("<td>").append(book.getAuthor()).append("</td></tr>");
+////            }
+//            String output= k.toString().replace("$$body$$",render.toString());
+//            Document document=new Document();
+//            document.open();
+//            HtmlConverter.convertToPdf(output,
+//                    new FileOutputStream("src/main/resources/PDF/Test.pdf/"));
+//            document.close();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        // return render;
+//    }
+}
 
 
 
@@ -287,7 +347,7 @@ public class MyController {
 //        return modelAndView;
 //    }
 
-}
+
 
 
 
